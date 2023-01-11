@@ -8,8 +8,14 @@ dbConnect()
 
 export default async function handler(req, res) {
 
-    console.log(req.method, req.url)
+    switch (req.method) {
 
-    const tasks = await Task.find();
-    res.status(200).json(tasks)
+      case "GET":
+        const tasks = await Task.find();
+        return res.status(200).json(tasks);
+        
+      default:
+        return res.status(400).json({ msg: "this method is not supported" });
+    }
+
   }
