@@ -1,5 +1,13 @@
+/* {
+  "compilerOptions": {     <-- Este es el código recomendado por Next, pero no funciona bien, pero el de abajo SÍ
+    "baseUrl": "src"
+  }
+} */
 {
   "compilerOptions": {
-    "baseUrl": "src"
+      "baseUrl": ".",
+      "paths": {
+        "*": ["src/*"]
+      }
   }
 }
