@@ -1,6 +1,6 @@
 import { headers } from "next.config";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Form,
@@ -19,7 +19,7 @@ export default function TaskFormPage() {
   const [errors, setErrors] = useState({}); //<--1↓ 
 
 //3Por último establemos el router para que pueda cambiar a la página principal una vez creada la tarea en el formulario. 
- const router = useRouter()
+ const {query, push} = useRouter()
 
 
 
@@ -38,8 +38,12 @@ export default function TaskFormPage() {
 
     if (Object.keys(errors).length) return setErrors(errors); //1<--  leer línea 28
     
-    await createTask()   //2<-- Último paso, darle la propiedad al handleSubmit de enviar el servidor (una vez creada la función abajo) para hacerlo llamando a la funcion
-    await router.push('/') //3<--
+    if (query.id){
+      await updateTask()
+    } else{
+      await createTask()
+    }  //2<-- Último paso, darle la propiedad al handleSubmit de enviar el servidor (una vez creada la función abajo) para hacerlo llamando a la funcion
+    await push('/') //3<--
   };
 
 //↓↓(2)Ahora sí, luego de haber configurado toda la validación(1), nos disponemos a enviar al servidor(2) 
@@ -57,11 +61,37 @@ try {
 }
 }
 
+const updateTask = async ()=> {
+  try {
+    await fetch('http://localhost:3000/api/tasks/' +query.id, {
+      method: 'PUT',
+      body: JSON.stringify(newTask),
+      headers: {
+        'Content-Type':'application/json'
+      }
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 
   const handleChange = (e) => {
     setNewTask({ ...newTask, [e.target.name]: e.target.value });
-    console.log(newTask);
+    //console.log(newTask);
   };
+
+  const getTask = async ()=> {
+    const res = await fetch('http://localhost:3000/api/tasks/' + query.id)
+    const data = await res.json()
+    setNewTask({title: data.title, description: data.description})
+    //console.log(data)
+  }
+
+  useEffect(() => {
+    if (query.id) getTask();
+  }, []);
+  
 
   return (
     <Grid
@@ -72,7 +102,7 @@ try {
     >
       <GridRow>
         <GridColumn textAlign="center">
-          <h1>Create Task</h1>
+          <h1>{query.id ? "Update Task" : "Create Task"}</h1>
           <Form onSubmit={handleSubmit}>
             <FormInput
               label="Title"
@@ -84,6 +114,7 @@ try {
                   ? { content: "Please enter a title", pointing: "below" } //*<--  leer línea 11
                   : null
               }
+              value={newTask.title}
             />
             <FormTextArea
               label="Description"
@@ -92,11 +123,12 @@ try {
               onChange={handleChange}
               error={
                 errors.title
-                  ? { content: errors.description/*acá lo pongo así, pero bien pude haverlo puesto a mano como con el title*/, pointing: "below" } //*<--  leer línea 11
+                  ? { content: errors.description/*acá lo pongo así, pero bien pude haberlo puesto a mano como con el title*/, pointing: "below" } //*<--  leer línea 11
                   : null
               }
+              value={newTask.description}
             />
-            <Button primary>Save</Button>
+            <Button primary>{query.id ? "Update Task" : "Create Task"}</Button>
           </Form>
         </GridColumn>
       </GridRow>

@@ -1,3 +1,4 @@
+import {useRouter} from 'next/router' //3<-- debemos traer router desde news.js para que te pueda redireccionar hasta allá. Estamos llamando a la tarea de forma de Editarla PUT o eliminarla DELETE
 import {
   Button,
   Card,
@@ -11,6 +12,10 @@ import {
 } from "semantic-ui-react";
 
 export default function HomePage({ tasks }) {
+
+const router = useRouter()   //3<-- al botón View
+
+
   //console.log(tasks);
   if (tasks.length === 0)
     return (
@@ -45,8 +50,8 @@ export default function HomePage({ tasks }) {
               <pa>{task.description}</pa>
               <CardContent>
                 <CardContent extra>
-                  <Button primary>View</Button>
-                  <Button secondary>Edit</Button>
+                  <Button primary onClick={() => router.push(`/tasks/${task._id}`)} >View</Button>
+                  <Button secondary onClick={() => router.push(`/tasks/${task._id}/edit`)} >Edit</Button>
                 </CardContent>
               </CardContent>
             </CardContent>
